@@ -52,6 +52,8 @@ public final class OpenVirteX {
 
         final OpenVirteXController ctrl = new OpenVirteXController(settings);
         OpenVirteX.log.info("Starting OpenVirteX...");
+        //new net.onrc.openvirtex.migrator.MigratorGUI().showMigrator();
+        new net.onrc.openvirtex.debugger.PhysicalNetworkTopologyExtractor();
         ctrl.run();
     }
 

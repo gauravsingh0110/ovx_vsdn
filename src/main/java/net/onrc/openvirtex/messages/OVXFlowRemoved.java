@@ -15,6 +15,8 @@
  ******************************************************************************/
 package net.onrc.openvirtex.messages;
 
+import net.onrc.openvirtex.elements.OVXMap;
+import net.onrc.openvirtex.elements.address.PhysicalIPAddress;
 import net.onrc.openvirtex.elements.datapath.OVXSwitch;
 import net.onrc.openvirtex.elements.datapath.PhysicalSwitch;
 import net.onrc.openvirtex.exceptions.MappingException;
@@ -50,6 +52,10 @@ public class OVXFlowRemoved extends OFFlowRemoved implements Virtualizable {
                  * send north ONLY if tenant controller wanted a FlowRemoved for
                  * the FlowMod
                  */
+                //
+                //Added by Gaurav
+                //Date 06-12-14
+                log.info("**** Flow removed {} ****",this.toString());
                 vsw.deleteFlowMod(this.cookie);
                 if (fm.hasFlag(OFFlowMod.OFPFF_SEND_FLOW_REM)) {
                     writeFields(fm);

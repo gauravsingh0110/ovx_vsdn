@@ -20,7 +20,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.onrc.openvirtex.elements.Mappable;
+import net.onrc.openvirtex.elements.OVXMap;
 import net.onrc.openvirtex.elements.address.IPMapper;
+import net.onrc.openvirtex.elements.address.PhysicalIPAddress;
 import net.onrc.openvirtex.elements.datapath.FlowTable;
 import net.onrc.openvirtex.elements.datapath.OVXFlowTable;
 import net.onrc.openvirtex.elements.datapath.OVXSwitch;
@@ -28,6 +31,7 @@ import net.onrc.openvirtex.elements.link.OVXLink;
 import net.onrc.openvirtex.elements.link.OVXLinkUtils;
 import net.onrc.openvirtex.elements.port.OVXPort;
 import net.onrc.openvirtex.exceptions.ActionVirtualizationDenied;
+import net.onrc.openvirtex.exceptions.AddressMappingException;
 import net.onrc.openvirtex.exceptions.DroppedMessageException;
 import net.onrc.openvirtex.exceptions.IndexOutOfBoundException;
 import net.onrc.openvirtex.exceptions.NetworkMappingException;
@@ -184,6 +188,20 @@ public class OVXFlowMod extends OFFlowMod implements Devirtualizable {
                     this.sw.getTenantId(), this);
         }
         this.computeLength();
+        
+    	//addded by Gaurav
+    	//Date: 01-12-14
+    	log.info("**** Match **** {} \n **** Action **** {}",this.match.toString(),this.getActions().toString());
+        //Mappable m=OVXMap.getInstance();
+        //PhysicalIPAddress pip=new PhysicalIPAddress(this.getMatch().getNetworkDestination());
+       /* try {
+			log.info("**** Virtual IP {}****",m.getVirtualIP(pip).toString());
+		} catch (AddressMappingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        */
+        
         if (pflag) {
             this.flags |= OFFlowMod.OFPFF_SEND_FLOW_REM;
             sw.sendSouth(this, inPort);

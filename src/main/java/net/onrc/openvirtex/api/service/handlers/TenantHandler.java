@@ -38,6 +38,7 @@ import net.onrc.openvirtex.api.service.handlers.tenant.StartOVXSwitch;
 import net.onrc.openvirtex.api.service.handlers.tenant.StopOVXNetwork;
 import net.onrc.openvirtex.api.service.handlers.tenant.StopOVXPort;
 import net.onrc.openvirtex.api.service.handlers.tenant.StopOVXSwitch;
+import net.onrc.openvirtex.migrator.MigrateVM;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
@@ -144,6 +145,19 @@ public class TenantHandler extends AbstractHandler implements RequestHandler {
      * Keyword for the boot state.
      */
     public static final String IS_BOOTED = "isBooted";
+    
+    /**
+     * Keywords for vsdn_project by Gaurav
+     */
+    public static final String VSDN_HOST_ID = "vsdn_hid";
+    public static final String VSDN_HOST_MAC = "vsdn_hmac";
+    public static final String VSDN_SWITCH_VIRTUAL_DPID = "vsdn_svdpid";
+    public static final String VSDN_SWITCH_PHYSICAL_DPID = "vsdn_spdpid";
+    public static final String VSDN_OLD_PORT = "vsdn_oport";
+    public static final String VSDN_NEW_PORT = "vsdn_nport";
+    
+    public static final String VSDN_TYPE_OF_TOPOLOGY="vsdn_ntype";
+    
 
     @SuppressWarnings({ "serial", "rawtypes" })
     private HashMap<String, ApiHandler> handlers = new HashMap<String, ApiHandler>() {
@@ -172,6 +186,9 @@ public class TenantHandler extends AbstractHandler implements RequestHandler {
             this.put("stopNetwork", new StopOVXNetwork());
             this.put("stopSwitch", new StopOVXSwitch());
             this.put("stopPort", new StopOVXPort());
+            
+            //Added by Gaurav
+            this.put("migrateVM", new MigrateVM());
         }
     };
 

@@ -293,7 +293,8 @@ public class OVXBigSwitch extends OVXSwitch {
             return;
         }
         final PhysicalSwitch sw = inPort.getPhysicalPort().getParentSwitch();
-        log.debug("Sending packet to sw {}: {}", sw.getName(), msg);
+        log.info("Sending packet to sw {}: {}", sw.getName(), msg);
+        //System.out.println("*****VSDN Debuggin******  " + msg.toString());
         sw.sendMsg(msg, this);
     }
 

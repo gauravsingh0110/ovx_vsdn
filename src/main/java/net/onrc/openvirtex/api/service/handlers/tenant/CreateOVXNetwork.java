@@ -53,7 +53,17 @@ public class CreateOVXNetwork extends ApiHandler<Map<String, Object>> {
                     TenantHandler.NETADD, params, true, null);
             final Number netMask = HandlerUtils.<Number>fetchField(
                     TenantHandler.NETMASK, params, true, null);
-
+            
+            //final String isReStrictedTopology=HandlerUtils.<String>fetchField(
+             //       TenantHandler.VSDN_TYPE_OF_TOPOLOGY, params, true, null);
+            
+            //final boolean isRestricted;
+            //if(isReStrictedTopology.equalsIgnoreCase("true")){
+            //	isRestricted=true;
+            //}else{
+            //	isRestricted=false;
+            //}
+            
             for (String ctrl : ctrlUrls) {
                 String[] ctrlParts = ctrl.split(":");
 

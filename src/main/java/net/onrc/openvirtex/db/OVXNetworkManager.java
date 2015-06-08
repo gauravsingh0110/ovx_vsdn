@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Modified by Gaurav for vsdn_project
  ******************************************************************************/
 package net.onrc.openvirtex.db;
 
@@ -66,6 +68,7 @@ public class OVXNetworkManager {
     private Set<DPIDandPort> onlinePorts;
     private boolean bootState;
     private OVXNetwork virtualNetwork;
+    private String isRestrictedTopology;
 
     private static Logger log = LogManager.getLogger(OVXNetworkManager.class
             .getName());
@@ -82,6 +85,8 @@ public class OVXNetworkManager {
         this.onlinePorts = new HashSet<DPIDandPort>();
         this.bootState = false;
         this.virtualNetwork = this.createNetwork();
+        //Added by Gaurav
+        //isRestrictedTopology=vnet.get(TenantHandler.VSDN_TYPE_OF_TOPOLOGY).toString();
     }
 
     public Integer getTenantId() {
@@ -117,7 +122,12 @@ public class OVXNetworkManager {
         final IPAddress addr = new OVXIPAddress(this.tenantId, (Integer) this.vnet.get(TenantHandler.NETADD));
         final Short netMask = ((Integer) this.vnet.get(TenantHandler.NETMASK))
                 .shortValue();
-
+        final boolean isRestricted;
+       // if(isRestrictedTopology.equalsIgnoreCase("true")){
+       // 	isRestricted=true;
+      //  }else{
+       // 	isRestricted=false;
+      //  }
         try {
             virtualNetwork = new OVXNetwork(this.tenantId, ctrlUrls, addr,
                     netMask);

@@ -16,15 +16,16 @@ VERSION = '0.1'
 SUPPORTED_PROTO = ['tcp']
 
 def getUrl(opts, path):
+    print URL % (opts.host, opts.port, path)
     return URL % (opts.host, opts.port, path)
 
 def buildRequest(data, url, cmd):
     j = { "id" : "ovxctl",  "method" : cmd , "jsonrpc" : "2.0" }
-    h = {"Content-Type" : "application/json-rpc"}
+    h = {"Content-Type" : "application/json-rpc"}  
     if data is not None:
         j['params'] = data
     return urllib2.Request(url, json.dumps(j), h)
-
+ 
 
 def pa_none(args, cmd):
     (sdesc, ldesc) = DESCS[cmd]
@@ -52,7 +53,7 @@ def do_addControllers(gopts, opts, args):
         print resp
 
 def pa_createNetwork(args, cmd):
-    usage = "%s <protocol> <controller_urls> <ip_network> <ip_mask> <is_restricted_topology>" % USAGE.format(cmd)
+    usage = "%s <protocol> <controller_urls> <ip_network> <ip_mask>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
     return parser.parse_args(args)
@@ -77,14 +78,14 @@ def buildControllerList(ctrls):
             sys.exit()
         controllerUrls.append(ctrl)
     return controllerUrls
-
+        
 
 def do_createNetwork(gopts, opts, args):
-    if len(args) != 4:
-        print "createNetwork : Must specify controllerUrls, network_ip, network_mask, is_restricted_topology"
+    if len(args) != 3:
+        print "createNetwork : Must specify controllerUrls, network_ip, network_mask"
         sys.exit()
     req = { "controllerUrls" : buildControllerList(args[0]), \
-                 "networkAddress" : args[1], "mask" : int(args[2]), "vsdn_ntype" : args[3] }
+                 "networkAddress" : args[1], "mask" : int(args[2]) }
     network_id = connect(gopts, "tenant", "createNetwork", data=req, passwd=getPasswd(gopts))
     if network_id:
         print "Virtual network has been created (network_id %s)." % str(network_id)
@@ -125,7 +126,7 @@ def do_createPort(gopts, opts, args):
         sys.exit()
     req = { "tenantId" : int(args[0]), "dpid" : int(args[1].replace(":", ""), 16), "port" : int(args[2]) }
     reply = connect(gopts, "tenant", "createPort", data=req, passwd=getPasswd(gopts))
-
+    
     switchId = reply.get('vdpid')
     portId = reply.get('vport')
     if switchId and portId:
@@ -143,8 +144,8 @@ def do_setInternalRouting(gopts, opts, args):
         print ("setInternalRouting : Must specify virtual tenant_id, virtual switch_id, " +
         "algorithm (spf, manual) and number of backup routes")
         sys.exit()
-    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16),
-           "algorithm" : args[2], "backup_num" : int(args[3]) }
+    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16), 
+           "algorithm" : args[2], "backup_num" : int(args[3]) } 
     reply = connect(gopts, "tenant", "setInternalRouting", data=req, passwd=getPasswd(gopts))
 
     tenantId = reply.get('tenantId')
@@ -162,13 +163,13 @@ def do_connectHost(gopts, opts, args):
     if len(args) != 4:
         print "connectHost : Must specify virtual tenant_id, virtual switch_id, virtual port_id and host MAC address"
         sys.exit()
-    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16),
-           "vport" : int(args[2]), "mac" : args[3] }
+    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16), 
+           "vport" : int(args[2]), "mac" : args[3] } 
     reply = connect(gopts, "tenant", "connectHost", data=req, passwd=getPasswd(gopts))
     hostId = reply.get('hostId')
     if hostId:
         print "Host (host_id %s) has been connected to virtual port" % (hostId)
-
+        
 def pa_connectLink(args, cmd):
     usage = "%s <tenant_id> <src_virtual_dpid> <src_virtual_port> <dst_virtual_dpid> <dst_virtual_port>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
@@ -178,11 +179,11 @@ def pa_connectLink(args, cmd):
 
 def do_connectLink(gopts, opts, args):
     if len(args) != 7:
-        print ("connectLink : Must specify tenant_id, src_virtual_dpid, src_virtual_port, dst_virtual_dpid, dst_virtual_port, "
+        print ("connectLink : Must specify tenant_id, src_virtual_dpid, src_virtual_port, dst_virtual_dpid, dst_virtual_port, " 
         + "algorithm (spf, manual), number of backup routes")
         sys.exit()
-    req = { "tenantId" : int(args[0]), "srcDpid" : int(args[1].replace(":", ""), 16),
-           "srcPort" : int(args[2]), "dstDpid" : int(args[3].replace(":", ""), 16),
+    req = { "tenantId" : int(args[0]), "srcDpid" : int(args[1].replace(":", ""), 16), 
+           "srcPort" : int(args[2]), "dstDpid" : int(args[3].replace(":", ""), 16), 
            "dstPort" : int(args[4]), "algorithm" : args[5], "backup_num" : int(args[6]) }
     reply = connect(gopts, "tenant", "connectLink", data=req, passwd=getPasswd(gopts))
     linkId = reply.get('linkId')
@@ -214,10 +215,10 @@ def pa_connectRoute(args, cmd):
 
 def do_connectRoute(gopts, opts, args):
     if len(args) != 6:
-        print ("connectRoute : Must specify tenant_id, virtual_dpid, src_virtual_port, dst_virtual_port, " +
+        print ("connectRoute : Must specify tenant_id, virtual_dpid, src_virtual_port, dst_virtual_port, " + 
         "the physical path that connect the end-points and the priority [0-255]")
         sys.exit()
-    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16),
+    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16), 
            "srcPort" : int(args[2]), "dstPort" : int(args[3]),
            "path" : translate_path(args[4]), "priority" : int(args[5]) }
     reply = connect(gopts, "tenant", "connectRoute", data=req, passwd=getPasswd(gopts))
@@ -231,43 +232,43 @@ def pa_removeNetwork(args, cmd):
     usage = "%s <tenant_id>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_removeNetwork(gopts, opts, args):
     if len(args) != 1:
         print "removeNetwork : Must specify a virtual tenant_id"
         sys.exit()
     req = { "tenantId" : int(args[0]) }
-    result = connect(gopts, "tenant", "removeNetwork", data=req, passwd=getPasswd(gopts))
-    print "Network (tenant_id %s) has been removed" % (args[0])
-
+    result = connect(gopts, "tenant", "removeNetwork", data=req, passwd=getPasswd(gopts)) 
+    print "Network (tenant_id %s) has been removed" % (args[0])       
+        
 def pa_removeSwitch(args, cmd):
     usage = "%s <tenant_id> <virtual_dpid>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_removeSwitch(gopts, opts, args):
     if len(args) != 2:
         print "removeSwitch : Must specify a virtual tenant_id and a virtual switch_id"
         sys.exit()
     req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16) }
-    result = connect(gopts, "tenant", "removeSwitch", data=req, passwd=getPasswd(gopts))
-    print "Switch (switch_id %s) has been removed" % (args[1])
+    result = connect(gopts, "tenant", "removeSwitch", data=req, passwd=getPasswd(gopts)) 
+    print "Switch (switch_id %s) has been removed" % (args[1])      
 
 def pa_removePort(args, cmd):
     usage = "%s <tenant_id> <virtual_dpid> <virtual_port>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_removePort(gopts, opts, args):
     if len(args) != 3:
         print "removePort : Must specify a virtual tenant_id, a virtual switch_id and a virtual port_id"
         sys.exit()
     req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16), "vport" : int(args[2])}
-    result = connect(gopts, "tenant", "removePort", data=req, passwd=getPasswd(gopts))
-    print "Port (port_id %s) has been removed from virtual switch (switch_id %s)" % (args[2], args[1])
+    result = connect(gopts, "tenant", "removePort", data=req, passwd=getPasswd(gopts)) 
+    print "Port (port_id %s) has been removed from virtual switch (switch_id %s)" % (args[2], args[1]) 
 
 def pa_disconnectHost(args, cmd):
     usage = "%s <tenant_id> <host_id>" % USAGE.format(cmd)
@@ -279,8 +280,8 @@ def do_disconnectHost(gopts, opts, args):
     if len(args) != 2:
         print "disconnectHost : Must specify a a virtual tenant_id and a host_id"
         sys.exit()
-    req = { "tenantId" : int(args[0]), "hostId" : int(args[1]) }
-    result = connect(gopts, "tenant", "disconnectHost", data=req, passwd=getPasswd(gopts))
+    req = { "tenantId" : int(args[0]), "hostId" : int(args[1]) } 
+    result = connect(gopts, "tenant", "disconnectHost", data=req, passwd=getPasswd(gopts)) 
     print "Host (host_id %s) has been disconnected from the virtual network (tenant_id %s)" % (args[1], args[0])
 
 def pa_disconnectLink(args, cmd):
@@ -293,8 +294,8 @@ def do_disconnectLink(gopts, opts, args):
     if len(args) != 2:
         print "disconnectLink : Must specify a a virtual tenant_id and a link_id"
         sys.exit()
-    req = { "tenantId" : int(args[0]), "linkId" : int(args[1]) }
-    result = connect(gopts, "tenant", "disconnectLink", data=req, passwd=getPasswd(gopts))
+    req = { "tenantId" : int(args[0]), "linkId" : int(args[1]) } 
+    result = connect(gopts, "tenant", "disconnectLink", data=req, passwd=getPasswd(gopts)) 
     print "Link (link_id %s) has been disconnected from the virtual network (tenant_id %s)" % (args[1], args[0])
 
 def pa_disconnectRoute(args, cmd):
@@ -307,7 +308,7 @@ def do_disconnectRoute(gopts, opts, args):
     if len(args) != 3:
         print "disconnectRoute : Must specify a virtual tenant_id, switch_id and a route_id"
         sys.exit()
-    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16) , "routeId" : int(args[2]) }
+    req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16) , "routeId" : int(args[2]) } 
     result = connect(gopts, "tenant", "disconnectRoute", data=req, passwd=getPasswd(gopts))
     print "Route (route_id %s) in virtual big-switch (switch_id %s) has been disconnected from the virtual network (tenant_id %s)" % (args[2], args[1], args[0])
 
@@ -317,14 +318,14 @@ def pa_startNetwork(args, cmd):
     usage = "%s <tenant_id>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_startNetwork(gopts, opts, args):
     if len(args) != 1:
         print "startNetwork : Must specify a tenant_id"
         sys.exit()
     req = { "tenantId" : int(args[0]) }
-    result = connect(gopts, "tenant", "startNetwork", data=req, passwd=getPasswd(gopts))
+    result = connect(gopts, "tenant", "startNetwork", data=req, passwd=getPasswd(gopts)) 
     if result:
         print "Network (tenant_id %s) has been booted" % (args[0])
 
@@ -332,22 +333,22 @@ def pa_startSwitch(args, cmd):
     usage = "%s <tenant_id> <virtual_dpid>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_startSwitch(gopts, opts, args):
     if len(args) != 2:
         print "startSwitch : Must specify a tenant_id and a virtual switch_id"
         sys.exit()
     req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16)}
-    result = connect(gopts, "tenant", "startSwitch", data=req, passwd=getPasswd(gopts))
+    result = connect(gopts, "tenant", "startSwitch", data=req, passwd=getPasswd(gopts)) 
     if result:
         print "Switch (switch_id %s) has been booted in virtual network (tenant_id %s)" % (args[1], args[0])
 
 def pa_startPort(args, cmd):
-    usage = "%s <tenant_id> <virtual_dpid> <virtual_port>" % USAGE.format(cmd)
+    usage = "%s <tenant_id> <virtual_dpid>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_startPort(gopts, opts, args):
     if len(args) != 3:
@@ -358,21 +359,21 @@ def do_startPort(gopts, opts, args):
     tenantId = reply.get('tenantId')
     switchId = reply.get('vdpid')
     portId = reply.get('vport')
-    if tenantId and switchId and portId:
+    if tenantId and switchId and hostId:
         print "Port (port_id %s) has been started in virtual switch (tenant_id %s, switch_id %s)" % (portId, tenantId, switchId)
 
 def pa_stopNetwork(args, cmd):
     usage = "%s <tenant_id>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_stopNetwork(gopts, opts, args):
     if len(args) != 1:
         print "stopNetwork : Must specify a tenant_id"
         sys.exit()
     req = { "tenantId" : int(args[0]) }
-    result = connect(gopts, "tenant", "stopNetwork", data=req, passwd=getPasswd(gopts))
+    result = connect(gopts, "tenant", "stopNetwork", data=req, passwd=getPasswd(gopts)) 
     if result:
         print "Network (tenant_id %s) has been shutdown" % (args[0])
 
@@ -380,29 +381,29 @@ def pa_stopSwitch(args, cmd):
     usage = "%s <tenant_id> <virtual_dpid>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_stopSwitch(gopts, opts, args):
     if len(args) != 2:
         print "stopSwitch : Must specify a tenant_id and a virtual switch_id"
         sys.exit()
     req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16)}
-    result = connect(gopts, "tenant", "stopSwitch", data=req, passwd=getPasswd(gopts))
+    result = connect(gopts, "tenant", "stopSwitch", data=req, passwd=getPasswd(gopts)) 
     if result:
         print "Switch (switch_id %s) has been shutdown in virtual network (tenant_id %s)" % (args[1], args[0])
 
 def pa_stopPort(args, cmd):
-    usage = "%s <tenant_id> <virtual_dpid> <virtual_port>" % USAGE.format(cmd)
+    usage = "%s <tenant_id> <virtual_dpid>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_stopPort(gopts, opts, args):
     if len(args) != 3:
         print "stopPort : Must specify a tenant_id, a virtual switch_id and a virtual port_id"
         sys.exit()
     req = { "tenantId" : int(args[0]), "vdpid" : int(args[1].replace(":", ""), 16), "vport" : int(args[2])}
-    result = connect(gopts, "tenant", "stopPort", data=req, passwd=getPasswd(gopts))
+    result = connect(gopts, "tenant", "stopPort", data=req, passwd=getPasswd(gopts)) 
     if result:
         print "Port (port_id %s) has been shutdown in virtual switch (tenant_id %s, switch_id %s)" % (args[2], args[0], args[1])
 
@@ -410,7 +411,7 @@ def pa_getPhysicalFlowtable(args, cmd):
     usage = "%s [<physical_dpid>]" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_getPhysicalFlowtable(gopts, opts, args):
     if len(args) > 1:
@@ -426,8 +427,8 @@ def pa_getPhysicalHosts(args, cmd):
     usage = "%s" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
-
+    return parser.parse_args(args)    
+    
 def do_getPhysicalHosts(gopts, opts, args):
     if len(args) > 0:
         print "getPhysicalHosts : No arguments"
@@ -440,7 +441,7 @@ def pa_getPhysicalTopology(args, cmd):
     usage = "%s" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_getPhysicalTopology(gopts, opts, args):
     if len(args) > 0:
@@ -454,7 +455,7 @@ def pa_listVirtualNetworks(args, cmd):
     usage = "%s" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
+    return parser.parse_args(args)    
 
 def do_listVirtualNetworks(gopts, opts, args):
     if len(args) > 0:
@@ -549,27 +550,7 @@ def do_getVirtualTopology(gopts, opts, args):
     req = { "tenantId": int(args[0]) }
     result = connect(gopts, "status", "getVirtualTopology", data=req, passwd=getPasswd(gopts))
     print json.dumps(result)
-
-
-# Methods added for vsdn_project by Gaurav
-
-def pa_migrateVM(args, cmd):
-    usage = "%s <tenant_id> <hgost_id> <host_mac> <switch_virtual_dpid> <switch_physical_dpid> <old_port> <new_port>" % USAGE.format(cmd)
-    (sdesc, ldesc) = DESCS[cmd]
-    parser = OptionParser(usage=usage, description=ldesc)
-    return parser.parse_args(args)
-
-def do_migrateVM(gopts, opts, args):
-    if len(args) != 7:
-        print "Migrate VM : Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, old_port, new_port"
-        sys.exit()
-    req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1]), "vsdn_hmac" : args[2], "vsdn_svdpid": args[3], "vsdn_spdpid":args[4], "vsdn_oport" : int(args[5]), "vsdn_nport" : int(args[6])}
-    reply = connect(gopts, "tenant", "migrateVM", data=req, passwd=getPasswd(gopts))
-    #hostId = reply.get('hostId')
-    #if hostId:
-    print "reply %s"% (reply)
-
-
+        
 # Other methods
 
 def translate_path(path_string):
@@ -662,20 +643,20 @@ CMDS = {
     'connectLink': (pa_connectLink, do_connectLink),
     'setLinkPath': (pa_setLinkPath, do_setLinkPath),
     'connectRoute': (pa_connectRoute, do_connectRoute),
-
+    
     'removeNetwork': (pa_removeNetwork, do_removeNetwork),
     'removeSwitch': (pa_removeSwitch, do_removeSwitch),
     'removePort': (pa_removePort, do_removePort),
     'disconnectHost': (pa_disconnectHost, do_disconnectHost),
     'disconnectLink': (pa_disconnectLink, do_disconnectLink),
     'disconnectRoute': (pa_disconnectRoute, do_disconnectRoute),
-
+    
     'startNetwork': (pa_startNetwork, do_startNetwork),
     'startSwitch': (pa_startSwitch, do_startSwitch),
     'startPort': (pa_startPort, do_startPort),
     'stopNetwork': (pa_stopNetwork, do_stopNetwork),
     'stopSwitch': (pa_stopSwitch, do_stopSwitch),
-    'stopPort': (pa_stopPort, do_stopPort),
+    'stopPort': (pa_stopPort, do_stopPort), 
 
     'getPhysicalFlowtable': (pa_getPhysicalFlowtable, do_getPhysicalFlowtable),
     'getPhysicalHosts': (pa_getPhysicalHosts, do_getPhysicalHosts),
@@ -688,10 +669,7 @@ CMDS = {
     'getVirtualLinkMapping': (pa_getVirtualLinkMapping, do_getVirtualLinkMapping),
     'getVirtualSwitchMapping': (pa_getVirtualSwitchMapping, do_getVirtualSwitchMapping),
     'getVirtualTopology': (pa_getVirtualTopology, do_getVirtualTopology),
-
-    'migrateVM' : (pa_migrateVM, do_migrateVM),
-
-
+    
     'help' : (pa_help, do_help)
 }
 
@@ -700,35 +678,35 @@ DESCS = {
                         ("Adds the specified list of controllers to a given virtual switch.\n"
                          "ExampleL addController <tenantId> <vdpid> <ctrlUrls>")),
     'createNetwork' : ("Creates a virtual network",
-                       ("Creates a virtual network. Input: protocol, controllerIP, controller port, ip address, mask, is restricted topology[true/false]. "
-                        "\nExample: createNetwork tcp 1.1.1.1 6634 192.168.1.0 24 true")),
-    'createSwitch' : ("Create virtual switch",
+                       ("Creates a virtual network. Input: protocol, controllerIP, controller port, ip address, mask. "
+                        "\nExample: createNetwork tcp 1.1.1.1 6634 192.168.1.0 24")),
+    'createSwitch' : ("Create virtual switch", 
                       ("Create a virtual switch. Must specify a tenant_id, and a list of the physical_dpids that will be part of the virtual switch."
                         "\nExample: createSwitch 1 00:00:00:00:00:00:00:01,00:00:00:00:00:00:00:02")),
-    'createPort' : ("Create virtual port",
+    'createPort' : ("Create virtual port", 
                       ("Create a virtual port. Must specify a tenant_id, a physical_dpid and a physical_port."
-                        "\nExample: createPort 1 00:00:00:00:00:00:00:01 1")),
-    'setInternalRouting' : ("Set big-switch internal routing mechanism",
-                      ("Set big-switch internal routing mechanism. Must specify a tenant_id, a virtual switch_id, the routing type (spf, manual) "
+                        "\nExample: createPort 1 00:00:00:00:00:00:00:01 1")),         
+    'setInternalRouting' : ("Set big-switch internal routing mechanism", 
+                      ("Set big-switch internal routing mechanism. Must specify a tenant_id, a virtual switch_id, the routing type (spf, manual) " 
                        "and the number (0-255) of the backup paths that have to be computed."
-                        "\nExample: setInternalRouting 1 00:00:00:00:00:00:00:01 spf 128")),
-    'connectHost' : ("Connect host to a virtual port",
+                        "\nExample: setInternalRouting 1 00:00:00:00:00:00:00:01 spf 128")),  
+    'connectHost' : ("Connect host to a virtual port", 
                       ("Connect host to a virtual port. Must specify a tenant_id, a virtual switch_id, a virtual port_id and the host MAC address."
-                        "\nExample: connectHost 1 00:a4:23:05:00:00:00:01 1 00:00:00:00:00:01")),
-    'connectLink' : ("Connect two virtual ports through a virtual link",
-                      ("Connect two virtual ports through a virtual link. Must specify a tenant_id, a virtual src_switch_id, a virtual src_port_id, "
+                        "\nExample: connectHost 1 00:a4:23:05:00:00:00:01 1 00:00:00:00:00:01")),         
+    'connectLink' : ("Connect two virtual ports through a virtual link", 
+                      ("Connect two virtual ports through a virtual link. Must specify a tenant_id, a virtual src_switch_id, a virtual src_port_id, " 
                        "a virtual dst_switch_id, a virtual dst_port_id, the routing type (spf, manual) and the number (0-255) of the backup paths that have to be computed."
-                        "\nExample: connectLink 1 00:a4:23:05:00:00:00:01 1 00:a4:23:05:00:00:00:02 1 spf 1")),
-    'setLinkPath' : ("Set the physical path of a virtual link",
+                        "\nExample: connectLink 1 00:a4:23:05:00:00:00:01 1 00:a4:23:05:00:00:00:02 1 spf 1")), 
+    'setLinkPath' : ("Set the physical path of a virtual link", 
                       ("Set the physical path of a virtual link. Must specify a tenant_id, a virtual link_id, a physical path and a priority (0-255)."
                         "\nExample: connectLink 1 1 00:00:00:00:00:00:00:01/1-00:00:00:00:00:00:00:02/1,"
                         "00:00:00:00:00:00:00:2/2-00:00:00:00:00:00:00:3/1 128")),
-    'connectRoute' : ("Connect two virtual ports inside a virtual big-switch",
-                      ("Connect two virtual ports inside a virtual big-switch. Must specify a tenant_id, a virtual switch_id, a virtual src_port_id, "
+    'connectRoute' : ("Connect two virtual ports inside a virtual big-switch", 
+                      ("Connect two virtual ports inside a virtual big-switch. Must specify a tenant_id, a virtual switch_id, a virtual src_port_id, " 
                        "a virtual dst_port_id, a physical path and a priority (0-255)."
                         "\nExample: connectRoute 1 00:a4:23:05:00:00:00:01 1 2 00:00:00:00:00:00:00:01/1-00:00:00:00:00:00:00:02/1,"
-                        "00:00:00:00:00:00:00:2/2-00:00:00:00:00:00:00:3/1 128")),
-
+                        "00:00:00:00:00:00:00:2/2-00:00:00:00:00:00:00:3/1 128")),           
+                  
     'removeNetwork' : ("Remove a virtual network",
                      ("Remove a virtual network. Must specify a tenant_id."
                         "\nExample: removeNetwork 1")),
@@ -747,19 +725,19 @@ DESCS = {
     'disconnectRoute' : ("Disconnect big-switch internal route between two virtual ports",
                      ("Disconnect big-switch internal route between two virtual ports. Must specify a tenant_id and the route_id."
                         "\nExample: disconnectRoute 1 00:a4:23:05:00:00:00:01 1")),
-
+         
     'startNetwork' : ("Start a virtual network",
                      ("Start a virtual network. Must specify a tenant_id."
-                        "\nExample: startNetwork 1")),
+                        "\nExample: startNetwork 1")), 
     'startSwitch' : ("Start a virtual switch",
                      ("Start a virtual switch. Must specify a tenant_id and a virtual switch_id."
                         "\nExample: startSwitch 1 00:a4:23:05:00:00:00:01")),
     'startPort' : ("Start a virtual port",
                      ("Start a virtual port. Must specify a tenant_id, a virtual switch_id and a virtual port_id."
-                        "\nExample: startPort 1 00:a4:23:05:00:00:00:01 1")),
+                        "\nExample: startPort 1 00:a4:23:05:00:00:00:01 1")),        
     'stopNetwork' : ("Stop a virtual network",
                      ("Stop a virtual network. Must specify a tenant_id."
-                        "\nExample: stopNetwork 1")),
+                        "\nExample: stopNetwork 1")), 
     'stopSwitch' : ("Shutdown a virtual switch",
                      ("Shutdown a virtual switch. Must specify a tenant_id and a virtual switch_id."
                         "\nExample: stopSwitch 1 00:a4:23:05:00:00:00:01")),
@@ -789,25 +767,17 @@ DESCS = {
                                   ("Get the flowtable in the specified virtual network. Must specify a virtual switch_id, optional virtual switch_id."
                                    "\nExample: getVirtualFlowtable 00:a4:23:05:00:00:00:01")),
     'getVirtualHosts' : ("Get list of hosts in virtual network",
-                         ("Get list of hosts in virtual network. Must specify a tenant_id"
+                         ("Get list of hosts in virtual network. Must specify a tenant_id",
                          "\nExample: getVirtualHosts 1")),
     'getVirtualLinkMapping' : ("Get the virtual to physical link mapping",
-                               ("Get the virtual to physical link mapping. Must specify a tenant_id."
+                               ("Get the virtual to physical link mapping. Must specify a tenant_id.",
                                "\nExample: getVirtualLinkMapping 1")),
     'getVirtualSwitchMapping' : ("Get the virtual to physical switch mapping",
-                                 ("Get the virtual to physical switch mapping. Must specify a tenant_id."
+                                 ("Get the virtual to physical switch mapping. Must specify a tenant_id.",
                                "\nExample: getVirtualSwitchMapping 1")),
     'getVirtualTopology' : ("Get the virtual topology",
-                                 ("Get the virtual topology. Must specify a tenant_id."
-                               "\nExample: getVirtualTopology 1")),
-
-    #APIs Added for vsdn_project by Gaurav
-
-
-    'migrateVM' : ("Migrate VM from one Physical Host to another",
-                      ("Migrate VM from one Physical Host to another. Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, old_port, new_port."
-                        "\nExample: migrateVM 1 //TODO : update this with correct example"))
-
+                                 ("Get the virtual topology. Must specify a tenant_id.",
+                               "\nExample: getVirtualTopology 1"))
 }
 
 USAGE="%prog {}"
@@ -818,17 +788,17 @@ def getPasswd(opts):
     if opts.no_passwd:
         return ""
     else:
-        return getpass.getpass("Password: ")
+        return getpass.getpass("Password: ") 
 
 def addCommonOpts (parser):
     parser.add_option("-h", "--hostname", dest="host", default="localhost",
                     help="Specify the OpenVirteX host; default='localhost'")
     parser.add_option("-p", "--port", dest="port", default="8080",
                     help="Specify the OpenVirteX web port; default=8080")
-    parser.add_option("-u", "--user", dest="ovx_user", default="admin",
+    parser.add_option("-u", "--user", dest="ovx_user", default="admin", 
                     help="OpenVirtex admin user; default='admin'")
     parser.add_option("-n", "--no-passwd", action="store_true",  dest="no_passwd", default=False,
-                    help="Run ovxctl with no password; default false")
+                    help="Run ovxctl with no password; default false") 
     parser.add_option("-v", "--version", action="callback", callback=printVersion)
     parser.add_option("--help", action="callback", callback=printHelp)
 
@@ -860,4 +830,4 @@ if __name__ == '__main__':
     print "%s is an unknown command" % sys.argv[-1]
   except Exception, e:
     print "uknown error"
-  #printHelp(None,None,None,parser)
+  printHelp(None,None,None,parser)

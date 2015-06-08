@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Modified by Gaurav for VSDN_Project
  ******************************************************************************/
 package net.onrc.openvirtex.elements.network;
 
@@ -88,6 +90,9 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
     private final BitSetIndex hostCounter;
     private final Map<OVXPort, Host> hostMap;
     private final OVXFlowManager flowManager;
+    
+    //Added by Gaurav
+   //private final boolean isRestrictedTopology;
 
     /**
      * Instantiates a virtual network. Only use if you have reserved the tenantId
@@ -116,6 +121,9 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
         this.hostMap = new HashMap<OVXPort, Host>();
         this.flowManager = new OVXFlowManager(this.tenantId,
                 this.hostMap.values());
+        
+        //Added By Gaurav
+        //this.isRestrictedTopology=isRestricted;
     }
 
     /**
@@ -129,7 +137,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
     public OVXNetwork(final ArrayList<String> controllerUrls,
             final IPAddress network, final short mask)
             throws IndexOutOfBoundException {
-        this(OpenVirteXController.getTenantCounter().getNewIndex(),
+    	this(OpenVirteXController.getTenantCounter().getNewIndex(),
                 controllerUrls, network, mask);
     }
 
