@@ -86,7 +86,7 @@ public class OVXNetworkManager {
         this.bootState = false;
         this.virtualNetwork = this.createNetwork();
         //Added by Gaurav
-        //isRestrictedTopology=vnet.get(TenantHandler.VSDN_TYPE_OF_TOPOLOGY).toString();
+        isRestrictedTopology=vnet.get(TenantHandler.VSDN_TYPE_OF_TOPOLOGY).toString();
     }
 
     public Integer getTenantId() {
@@ -122,15 +122,16 @@ public class OVXNetworkManager {
         final IPAddress addr = new OVXIPAddress(this.tenantId, (Integer) this.vnet.get(TenantHandler.NETADD));
         final Short netMask = ((Integer) this.vnet.get(TenantHandler.NETMASK))
                 .shortValue();
-        final boolean isRestricted;
-       // if(isRestrictedTopology.equalsIgnoreCase("true")){
-       // 	isRestricted=true;
-      //  }else{
-       // 	isRestricted=false;
-      //  }
+        final boolean isRestricted=true;
+        //TODO: check how this code works, for now everytime topology is restricted
+        //if(isRestrictedTopology.equalsIgnoreCase("true")){
+        //	isRestricted=true;
+        //}else{
+        //	isRestricted=false;
+       // }
         try {
             virtualNetwork = new OVXNetwork(this.tenantId, ctrlUrls, addr,
-                    netMask);
+                    netMask,isRestricted);
         } catch (IndexOutOfBoundException e) {
             OVXNetworkManager.log.error(
                     "Error recreating virtual network {} from database",

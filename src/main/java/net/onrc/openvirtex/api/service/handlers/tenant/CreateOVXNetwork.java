@@ -54,16 +54,8 @@ public class CreateOVXNetwork extends ApiHandler<Map<String, Object>> {
             final Number netMask = HandlerUtils.<Number>fetchField(
                     TenantHandler.NETMASK, params, true, null);
             
-            //final String isReStrictedTopology=HandlerUtils.<String>fetchField(
-             //       TenantHandler.VSDN_TYPE_OF_TOPOLOGY, params, true, null);
-            
-            //final boolean isRestricted;
-            //if(isReStrictedTopology.equalsIgnoreCase("true")){
-            //	isRestricted=true;
-            //}else{
-            //	isRestricted=false;
-            //}
-            
+            final boolean isRestrictedTopology=true;
+      
             for (String ctrl : ctrlUrls) {
                 String[] ctrlParts = ctrl.split(":");
 
@@ -72,7 +64,7 @@ public class CreateOVXNetwork extends ApiHandler<Map<String, Object>> {
             }
             final IPAddress addr = new OVXIPAddress(netAddress, -1);
             final OVXNetwork virtualNetwork = new OVXNetwork(ctrlUrls, addr,
-                    netMask.shortValue());
+                    netMask.shortValue(),isRestrictedTopology);
             virtualNetwork.register();
             this.log.info("Created virtual network {}",
                     virtualNetwork.getTenantId());

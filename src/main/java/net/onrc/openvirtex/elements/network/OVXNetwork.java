@@ -59,6 +59,7 @@ import net.onrc.openvirtex.util.OVXFlowManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.omg.CosNaming.IstringHelper;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFPacketOut;
@@ -92,7 +93,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
     private final OVXFlowManager flowManager;
     
     //Added by Gaurav
-   //private final boolean isRestrictedTopology;
+    private boolean isRestrictedTopology;
 
     /**
      * Instantiates a virtual network. Only use if you have reserved the tenantId
@@ -106,7 +107,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
      */
     public OVXNetwork(final int tenantId,
             final ArrayList<String> controllerUrls, final IPAddress network,
-            final short mask) throws IndexOutOfBoundException {
+            final short mask, final boolean isRestricted) throws IndexOutOfBoundException {
         super();
         this.tenantId = tenantId;
         this.controllerUrls = new HashSet<String>();
@@ -123,7 +124,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
                 this.hostMap.values());
         
         //Added By Gaurav
-        //this.isRestrictedTopology=isRestricted;
+        this.isRestrictedTopology=isRestricted;
     }
 
     /**
@@ -135,12 +136,20 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> implements
      * @throws IndexOutOfBoundException
      */
     public OVXNetwork(final ArrayList<String> controllerUrls,
-            final IPAddress network, final short mask)
+            final IPAddress network, final short mask, final boolean isRestricted)
             throws IndexOutOfBoundException {
     	this(OpenVirteXController.getTenantCounter().getNewIndex(),
-                controllerUrls, network, mask);
+                controllerUrls, network, mask, isRestricted);
     }
 
+    
+    public void setTopologyRestriction(boolean restriction){
+    	this.isRestrictedTopology=restriction;
+    }
+    
+    public boolean getTopologyRestriction(){
+    	return this.isRestrictedTopology;
+    }
     /**
      * Gets the list of controller URLs.
      *

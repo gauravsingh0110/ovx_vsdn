@@ -38,6 +38,8 @@ import net.onrc.openvirtex.api.service.handlers.tenant.StartOVXSwitch;
 import net.onrc.openvirtex.api.service.handlers.tenant.StopOVXNetwork;
 import net.onrc.openvirtex.api.service.handlers.tenant.StopOVXPort;
 import net.onrc.openvirtex.api.service.handlers.tenant.StopOVXSwitch;
+import net.onrc.openvirtex.migrator.ChangeRestriction;
+import net.onrc.openvirtex.migrator.GetAllowedSwitches;
 import net.onrc.openvirtex.migrator.MigrateVM;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
@@ -153,8 +155,7 @@ public class TenantHandler extends AbstractHandler implements RequestHandler {
     public static final String VSDN_HOST_MAC = "vsdn_hmac";
     public static final String VSDN_SWITCH_VIRTUAL_DPID = "vsdn_svdpid";
     public static final String VSDN_SWITCH_PHYSICAL_DPID = "vsdn_spdpid";
-    public static final String VSDN_OLD_PORT = "vsdn_oport";
-    public static final String VSDN_NEW_PORT = "vsdn_nport";
+    public static final String VSDN_PHYSICAL_PORT = "vsdn_pport";
     
     public static final String VSDN_TYPE_OF_TOPOLOGY="vsdn_ntype";
     
@@ -189,7 +190,11 @@ public class TenantHandler extends AbstractHandler implements RequestHandler {
             
             //Added by Gaurav
             this.put("migrateVM", new MigrateVM());
+            this.put("changeRestriction", new ChangeRestriction());
+            this.put("getAllowedSwitches", new GetAllowedSwitches());
+
         }
+        
     };
 
 

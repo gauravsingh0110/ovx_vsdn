@@ -52,7 +52,7 @@ def do_addControllers(gopts, opts, args):
         print resp
 
 def pa_createNetwork(args, cmd):
-    usage = "%s <protocol> <controller_urls> <ip_network> <ip_mask> <is_restricted_topology>" % USAGE.format(cmd)
+    usage = "%s <protocol> <controller_urls> <ip_network> <ip_mask> " % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
     return parser.parse_args(args)
@@ -80,11 +80,11 @@ def buildControllerList(ctrls):
 
 
 def do_createNetwork(gopts, opts, args):
-    if len(args) != 4:
-        print "createNetwork : Must specify controllerUrls, network_ip, network_mask, is_restricted_topology"
+    if len(args) != 3:
+        print "createNetwork : Must specify controllerUrls, network_ip, network_mask"
         sys.exit()
     req = { "controllerUrls" : buildControllerList(args[0]), \
-                 "networkAddress" : args[1], "mask" : int(args[2]), "vsdn_ntype" : args[3] }
+                 "networkAddress" : args[1], "mask" : int(args[2]) }
     network_id = connect(gopts, "tenant", "createNetwork", data=req, passwd=getPasswd(gopts))
     if network_id:
         print "Virtual network has been created (network_id %s)." % str(network_id)
@@ -560,11 +560,44 @@ def pa_migrateVM(args, cmd):
     return parser.parse_args(args)
 
 def do_migrateVM(gopts, opts, args):
-    if len(args) != 7:
-        print "Migrate VM : Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, old_port, new_port"
+    if len(args) != 6:
+        print "Migrate VM : Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, physical_port"
         sys.exit()
-    req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1]), "vsdn_hmac" : args[2], "vsdn_svdpid": args[3], "vsdn_spdpid":args[4], "vsdn_oport" : int(args[5]), "vsdn_nport" : int(args[6])}
+    req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1]), "vsdn_hmac" : args[2], "vsdn_svdpid": args[3], "vsdn_spdpid":args[4], "vsdn_pport" : int(args[5])}
     reply = connect(gopts, "tenant", "migrateVM", data=req, passwd=getPasswd(gopts))
+    #hostId = reply.get('hostId')
+    #if hostId:
+    print "reply %s"% (reply)
+
+
+def pa_changeRestriction(args, cmd):
+    usage = "%s <tenant_id> <is_restricted_topology>" % USAGE.format(cmd)
+    (sdesc, ldesc) = DESCS[cmd]
+    parser = OptionParser(usage=usage, description=ldesc)
+    return parser.parse_args(args)
+
+def do_changeRestriction(gopts, opts, args):
+    if len(args) != 2:
+        print "Change Restriction : Must specify a tenant_id, is_restricted_topology"
+        sys.exit()
+    req = { "tenantId" : int(args[0]), "vsdn_ntype" : args[1]}
+    reply = connect(gopts, "tenant", "changeRestriction", data=req, passwd=getPasswd(gopts))
+    #hostId = reply.get('hostId')
+    #if hostId:
+    print "reply %s"% (reply)
+
+def pa_getAllowedSwitches(args, cmd):
+    usage = "%s <tenant_id> <host_id>" % USAGE.format(cmd)
+    (sdesc, ldesc) = DESCS[cmd]
+    parser = OptionParser(usage=usage, description=ldesc)
+    return parser.parse_args(args)
+
+def do_getAllowedSwitches(gopts, opts, args):
+    if len(args) != 2:
+        print "Get Allowed Switches : Must specify a tenant_id, host_id"
+        sys.exit()
+    req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1])}
+    reply = connect(gopts, "tenant", "getAllowedSwitches", data=req, passwd=getPasswd(gopts))
     #hostId = reply.get('hostId')
     #if hostId:
     print "reply %s"% (reply)
@@ -690,6 +723,8 @@ CMDS = {
     'getVirtualTopology': (pa_getVirtualTopology, do_getVirtualTopology),
 
     'migrateVM' : (pa_migrateVM, do_migrateVM),
+    'changeRestriction' : (pa_changeRestriction, do_changeRestriction),
+    'getAllowedSwitches' : (pa_getAllowedSwitches, do_getAllowedSwitches),
 
 
     'help' : (pa_help, do_help)
@@ -700,8 +735,8 @@ DESCS = {
                         ("Adds the specified list of controllers to a given virtual switch.\n"
                          "ExampleL addController <tenantId> <vdpid> <ctrlUrls>")),
     'createNetwork' : ("Creates a virtual network",
-                       ("Creates a virtual network. Input: protocol, controllerIP, controller port, ip address, mask, is restricted topology[true/false]. "
-                        "\nExample: createNetwork tcp 1.1.1.1 6634 192.168.1.0 24 true")),
+                       ("Creates a virtual network. Input: protocol, controllerIP, controller port, ip address, mask. "
+                        "\nExample: createNetwork tcp 1.1.1.1 6634 192.168.1.0 24")),
     'createSwitch' : ("Create virtual switch",
                       ("Create a virtual switch. Must specify a tenant_id, and a list of the physical_dpids that will be part of the virtual switch."
                         "\nExample: createSwitch 1 00:00:00:00:00:00:00:01,00:00:00:00:00:00:00:02")),
@@ -805,8 +840,15 @@ DESCS = {
 
 
     'migrateVM' : ("Migrate VM from one Physical Host to another",
-                      ("Migrate VM from one Physical Host to another. Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, old_port, new_port."
-                        "\nExample: migrateVM 1 //TODO : update this with correct example"))
+                      ("Migrate VM from one Physical Host to another. Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, physical_port."
+                        "\nExample: migrateVM 1 //TODO : update this with correct example")),
+    'changeRestriction' : ("Change the Topology Restriction of a Virtual Network",
+                            ("Change the Topology Restriction of a Virtual Network. Must specify a tenant_id, is_topology_restricted."
+                        "\nExample: changeRestriction 1 true")),
+    'getAllowedSwitches' : ("Get the list of Physical Switches Valid for Migration",
+                            ("Get the list of Physical Switches Valid for Migration. Must specify a tenant_id, host_id."
+                        "\nExample: getAllowedSwitches 1 2"))
+
 
 }
 
@@ -860,4 +902,4 @@ if __name__ == '__main__':
     print "%s is an unknown command" % sys.argv[-1]
   except Exception, e:
     print "uknown error"
-  #printHelp(None,None,None,parser)
+  printHelp(None,None,None,parser)
