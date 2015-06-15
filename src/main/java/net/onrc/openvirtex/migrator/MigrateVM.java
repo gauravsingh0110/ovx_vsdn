@@ -83,15 +83,16 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 				for (OVXSwitch s : virtualSwitches) {
 					physicalSwitches.addAll(ovxMap.getPhysicalSwitches(s));
 				}
-				Map <Short,PhysicalPort> m=physicalSwitch.getPorts();
-				for(Short key:m.keySet()){
-					PhysicalPort p=m.get(key);
-					if(p.isEdge()){
-						LinkPair<PhysicalLink> lp=p.getLink();
-						lp.getOutLink().getDstPort().getHardwareAddress();
-					}
-				}
-				
+			
+				/*Map<Short, PhysicalPort> m = physicalSwitch.getPorts();
+				for (Short key : m.keySet()) {
+					PhysicalPort p = m.get(key);
+					log.info("Port info " + p.toString());
+
+					//TODO: Delete it, unused code 
+
+				}*/
+
 				if (!physicalSwitches.contains(physicalSwitch)) {
 					OVXSwitch ovxSs, ovxDs;
 					OVXPort ovxSp = null, ovxDp = null;

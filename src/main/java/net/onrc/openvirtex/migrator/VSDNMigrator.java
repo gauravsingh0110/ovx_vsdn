@@ -2,6 +2,7 @@ package net.onrc.openvirtex.migrator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import net.onrc.openvirtex.api.service.handlers.HandlerUtils;
 import net.onrc.openvirtex.elements.OVXMap;
@@ -100,11 +101,27 @@ public class VSDNMigrator {
 	public int disconnectHost(int hostId) {
 		try {
 
+			Host h = virtualNetwork.getHost(hostId);
+			OVXSwitch s=null;
+			OVXPort p=null;
+			if (h != null) {
+				p = h.getPort();
+				s = p.getParentSwitch();
+			}
 			// verify the arguments
 			HandlerUtils.isValidHostId(tenantId, hostId);
-
 			// Disconnect the host
 			virtualNetwork.disconnectHost(hostId);
+			//disconnect the port
+			virtualNetwork.removePort(s.getSwitchId(), p.getPortNumber());
+			
+			//Check if switch needs to be removed
+			Map<Short, OVXPort> m = s.getPorts();
+			for(Short key: m.keySet()){
+				OVXPort lp=m.get(key);
+				log.info("UUUUUUUUUUUUUUUUUUUUUU "+lp.toString());
+			}
+			
 			log.info("**** VSDNMigrator **** : Successfully removed the host");
 		} catch (final InvalidTenantIdException e) {
 			log.error("**** VSDNMigrator (ErrorCode : -1) **** : Invalid Tenant ID in disconnectHost()");
