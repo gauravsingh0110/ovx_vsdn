@@ -24,7 +24,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 public class ChangeRestriction extends ApiHandler<Map<String, Object>> {
 
-    Logger log = LogManager.getLogger(ConnectHost.class.getName());
+    Logger log = LogManager.getLogger(ChangeRestriction.class.getName());
 	String message;;
 
     @Override

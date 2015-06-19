@@ -20,9 +20,7 @@ import net.onrc.openvirtex.elements.link.OVXLink;
 import net.onrc.openvirtex.elements.link.PhysicalLink;
 import net.onrc.openvirtex.elements.network.OVXNetwork;
 import net.onrc.openvirtex.elements.network.PhysicalNetwork;
-import net.onrc.openvirtex.elements.port.LinkPair;
 import net.onrc.openvirtex.elements.port.OVXPort;
-import net.onrc.openvirtex.elements.port.PhysicalPort;
 import net.onrc.openvirtex.exceptions.DuplicateMACException;
 import net.onrc.openvirtex.exceptions.InvalidPortException;
 import net.onrc.openvirtex.exceptions.InvalidTenantIdException;
@@ -37,7 +35,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 public class MigrateVM extends ApiHandler<Map<String, Object>> {
 
-	Logger log = LogManager.getLogger(ConnectHost.class.getName());
+	Logger log = LogManager.getLogger(MigrateVM.class.getName());
 	private VSDNMigrator vsdnm = new VSDNMigrator();
 	Host host;
 	String message;
@@ -56,8 +54,6 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 					TenantHandler.VSDN_HOST_ID, params, true, null);
 			final String hmac = HandlerUtils.<String> fetchField(
 					TenantHandler.VSDN_HOST_MAC, params, true, null);
-			final String svdpid = HandlerUtils.<String> fetchField(
-					TenantHandler.VSDN_SWITCH_VIRTUAL_DPID, params, true, null);
 			final String spdpid = HandlerUtils
 					.<String> fetchField(
 							TenantHandler.VSDN_SWITCH_PHYSICAL_DPID, params,
@@ -65,8 +61,8 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 			final Number pport = HandlerUtils.<Number> fetchField(
 					TenantHandler.VSDN_PHYSICAL_PORT, params, true, null);
 
-			log.info("********* Got the python ********" + tenantId + " " + hid
-					+ " " + hmac + " " + svdpid + " " + spdpid + " " + pport);
+			//log.info("********* Got the python ********" + tenantId + " " + hid
+			//		+ " " + hmac + " " + " " + spdpid + " " + pport);
 			if (checkValidity(tenantId.intValue(), hid.intValue(), spdpid)) {
 				vsdnm.openVirtualNetwork(tenantId.intValue());
 				vsdnm.disconnectHost(hid.intValue());
@@ -83,15 +79,16 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 				for (OVXSwitch s : virtualSwitches) {
 					physicalSwitches.addAll(ovxMap.getPhysicalSwitches(s));
 				}
-			
-				/*Map<Short, PhysicalPort> m = physicalSwitch.getPorts();
-				for (Short key : m.keySet()) {
-					PhysicalPort p = m.get(key);
-					log.info("Port info " + p.toString());
 
-					//TODO: Delete it, unused code 
-
-				}*/
+				/*
+				 * Map<Short, PhysicalPort> m = physicalSwitch.getPorts(); for
+				 * (Short key : m.keySet()) { PhysicalPort p = m.get(key);
+				 * //log.info("Port info " + p.toString());
+				 * 
+				 * //TODO: Delete it, unused code
+				 * 
+				 * }
+				 */
 
 				if (!physicalSwitches.contains(physicalSwitch)) {
 					OVXSwitch ovxSs, ovxDs;
@@ -127,12 +124,12 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 					PhysicalLink src, dst;
 					src = shortestPath.get(0);
 					dst = shortestPath.get(shortestLength - 1);
-					log.info("()()()() " + shortestLength + " "
-							+ shortestPath.toString() + " \n "
-							+ src.getSrcPort() + src.getSrcSwitch()
-							+ src.getDstPort() + src.getDstSwitch() + " "
-							+ dst.getSrcPort() + dst.getSrcSwitch()
-							+ dst.getDstPort() + dst.getDstSwitch());
+					//log.info("()()()() " + shortestLength + " "
+							//+ shortestPath.toString() + " \n "
+							//+ src.getSrcPort() + src.getSrcSwitch()
+						//	+ src.getDstPort() + src.getDstSwitch() + " "
+						//	+ dst.getSrcPort() + dst.getSrcSwitch()
+						//	+ dst.getDstPort() + dst.getDstSwitch());
 
 					if (shortestLength == 1) {
 						ovxSs = ovxMap.getVirtualSwitch(src.getSrcSwitch(),
@@ -179,10 +176,10 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 						message = "Error Could not create Link";
 					}
 
-					log.info("()()(yippe)()() \n" + ovxSs.toString() + " \n"
-							+ ovxDs.toString() + " \n" + ovxSp.toString()
-							+ " \n" + ovxDp.toString() + "\n "
-							+ vlink.toString());
+					//log.info("()()(yippe)()() \n" + ovxSs.toString() + " \n"
+						//	+ ovxDs.toString() + " \n" + ovxSp.toString()
+						//	+ " \n" + ovxDp.toString() + "\n "
+						//	+ vlink.toString());
 
 					/*
 					 * if (ovxSp != null && ovxDp != null) {
@@ -195,20 +192,28 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 					 */
 
 				}
-				// physicalSwitch.get
+				/*TODO Cannot figure out newly attached hosts using this, have to figure out a new way
+				Map<Short,PhysicalPort> m=physicalSwitch.getPorts();
+				for(Short k:m.keySet()){
+					PhysicalPort pp=m.get(k);
+					if(pp.isEdge()){
+						log.info("~~~~~~~~~~~~~~~~~~"+pp.);
+					}
+				}*/
 
 				OVXPort ovxPort = vsdnm.createPort(
 						Long.parseLong(spdpid.replace(":", ""), 16),
 						pport.shortValue());
+				OVXSwitch ovxs = ovxMap.getVirtualSwitch(physicalSwitch,
+						tenantId.intValue());
 				if (ovxPort != null) {
-					host = vsdnm.connectHost(
-							Long.parseLong(svdpid.replace(":", ""), 16),
+					host = vsdnm.connectHost(ovxs.getSwitchId(),
 							ovxPort.getPortNumber(), hmac);
 
 				}
 				if (ovxPort != null && host != null) {
 					message = "Successfylly migrated the host";
-					log.info("Successfylly migrated the host");
+					//log.info("Successfylly migrated the host");
 				} else {
 					log.error("Some error occured, check Logs");
 					message = "Some error occured, check Log";
@@ -237,7 +242,7 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 			 * 
 			 * if (host == null) { resp = new JSONRPC2Response( new
 			 * JSONRPC2Error( JSONRPC2Error.INTERNAL_ERROR.getCode(),
-			 * this.cmdName()), 0); } else { this.log.info(
+			 * this.cmdName()), 0); } else { this.//log.info(
 			 * "Connected host with id {} and mac {} to virtual port {} on virtual switch {} in virtual network {}"
 			 * , host.getHostId(), host.getMac().toString(), host
 			 * .getPort().getPortNumber(), host.getPort()
@@ -301,27 +306,27 @@ public class MigrateVM extends ApiHandler<Map<String, Object>> {
 
 			// Getting list of all physical switches
 			allSwitches.addAll(physicalNetwork.getSwitches());
-			// log.info("^^^^^^^^^^ all switches : "+allSwitches.toString());
+			// //log.info("^^^^^^^^^^ all switches : "+allSwitches.toString());
 
 			// Getting all switches in the corresponding Virtual Network
 			OVXNetwork ovxNetwork = ovxMap.getVirtualNetwork(tenantID);
 			if (ovxNetwork.getTopologyRestriction()) {
 				virtualSwitches.addAll(ovxNetwork.getSwitches());
-				// log.info("^^^^^^^^^^ all virtual switches : "+virtualSwitches.toString());
+				// //log.info("^^^^^^^^^^ all virtual switches : "+virtualSwitches.toString());
 				Host host = ovxNetwork.getHost(hostID);
 				OVXSwitch selfSwitch = host.getPort().getParentSwitch();
-				// log.info("^^^^^^^^^^ host switch : "+selfSwitch.toString());
+				// //log.info("^^^^^^^^^^ host switch : "+selfSwitch.toString());
 				virtualSwitches.remove(selfSwitch);
-				// log.info("^^^^^^^^^^ all new virtual switches : "+virtualSwitches.toString());
+				// //log.info("^^^^^^^^^^ all new virtual switches : "+virtualSwitches.toString());
 				for (OVXSwitch s : virtualSwitches) {
 					allSwitches.removeAll(ovxMap.getPhysicalSwitches(s));
 				}
 			}
 			validSwitches.addAll(allSwitches);
-			// log.info("physical dpid in String : " + pdpid);
+			// //log.info("physical dpid in String : " + pdpid);
 
 			long ndpid = Long.parseLong(pdpid.replace(":", ""), 16);
-			// log.info("physical dpid in long : " + ndpid);
+			// //log.info("physical dpid in long : " + ndpid);
 			PhysicalSwitch newSwitch = physicalNetwork.getSwitch(ndpid);
 			if (validSwitches.contains(newSwitch)) {
 				return true;

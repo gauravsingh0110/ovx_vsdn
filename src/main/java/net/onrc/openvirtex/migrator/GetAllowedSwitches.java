@@ -32,7 +32,7 @@ import net.onrc.openvirtex.exceptions.SwitchMappingException;
 
 public class GetAllowedSwitches extends ApiHandler<Map<String, Object>> {
 
-	Logger log = LogManager.getLogger(ConnectHost.class.getName());
+	Logger log = LogManager.getLogger(GetAllowedSwitches.class.getName());
 	String message;
 
 	@Override
@@ -45,7 +45,7 @@ public class GetAllowedSwitches extends ApiHandler<Map<String, Object>> {
 			final Number hid = HandlerUtils.<Number> fetchField(
 					TenantHandler.VSDN_HOST_ID, params, true, null);
 
-			log.info("********* Got the python ********" + tenantId + " " + hid);
+			//log.info("********* Got the python ********" + tenantId + " " + hid);
 
 			// Getting valid switches to migrate to
 
@@ -56,7 +56,7 @@ public class GetAllowedSwitches extends ApiHandler<Map<String, Object>> {
 			// Getting list of all physical switches
 			PhysicalNetwork physicalNetwork = PhysicalNetwork.getInstance();
 			allSwitches.addAll(physicalNetwork.getSwitches());
-			// log.info("^^^^^^^^^^ all switches : "+allSwitches.toString());
+			// //log.info("^^^^^^^^^^ all switches : "+allSwitches.toString());
 
 			// Getting all switches in the corresponding Virtual Network
 			OVXMap ovxMap = OVXMap.getInstance();
@@ -69,11 +69,11 @@ public class GetAllowedSwitches extends ApiHandler<Map<String, Object>> {
 			} else {
 				if (ovxNetwork.getTopologyRestriction()) {
 					virtualSwitches.addAll(ovxNetwork.getSwitches());
-					// log.info("^^^^^^^^^^ all virtual switches : "+virtualSwitches.toString());
+					// //log.info("^^^^^^^^^^ all virtual switches : "+virtualSwitches.toString());
 					OVXSwitch selfSwitch = host.getPort().getParentSwitch();
-					// log.info("^^^^^^^^^^ host switch : "+selfSwitch.toString());
+					// //log.info("^^^^^^^^^^ host switch : "+selfSwitch.toString());
 					virtualSwitches.remove(selfSwitch);
-					// log.info("^^^^^^^^^^ all new virtual switches : "+virtualSwitches.toString());
+					// //log.info("^^^^^^^^^^ all new virtual switches : "+virtualSwitches.toString());
 					for (OVXSwitch s : virtualSwitches) {
 						allSwitches.removeAll(ovxMap.getPhysicalSwitches(s));
 					}
@@ -83,8 +83,7 @@ public class GetAllowedSwitches extends ApiHandler<Map<String, Object>> {
 				message = "success";
 			}
 
-			log.info("^^^^^^^^^^ valid physical switches : "
-					+ validSwitches.toString());
+			//log.info("^^^^^^^^^^ valid physical switches : "
 			Map<String, Object> reply = new HashMap<String, Object>();
 			reply.put("message", message);
 			reply.put("valid_switches", validSwitches.toString());
@@ -104,7 +103,7 @@ public class GetAllowedSwitches extends ApiHandler<Map<String, Object>> {
 			 * 
 			 * if (host == null) { resp = new JSONRPC2Response( new
 			 * JSONRPC2Error( JSONRPC2Error.INTERNAL_ERROR.getCode(),
-			 * this.cmdName()), 0); } else { this.log.info(
+			 * this.cmdName()), 0); } else { this.//log.info(
 			 * "Connected host with id {} and mac {} to virtual port {} on virtual switch {} in virtual network {}"
 			 * , host.getHostId(), host.getMac().toString(), host
 			 * .getPort().getPortNumber(), host.getPort()

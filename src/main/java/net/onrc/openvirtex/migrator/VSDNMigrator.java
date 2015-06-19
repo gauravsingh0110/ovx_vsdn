@@ -58,9 +58,9 @@ public class VSDNMigrator {
 		try {
 			ovxSwitch = virtualNetwork.createSwitch(longDpids);
 			if (ovxSwitch != null) {
-				log.info("Successfull added a new switch with virtual dpid"
-						+ ovxSwitch.getSwitchId() + " to the VirtualNetwork "
-						+ tenantId);
+				// log.info("Successfull added a new switch with virtual dpid"
+				// + ovxSwitch.getSwitchId() + " to the VirtualNetwork "
+				// + tenantId);
 			} else {
 				log.error("Failed to add the switch with physical dpid "
 						+ pdpid + " to the Virtual Network " + tenantId);
@@ -84,14 +84,11 @@ public class VSDNMigrator {
 			virtualLink = virtualNetwork.connectLink(srcDpid, srcPort, dstDpid,
 					dstPort, alg, backupNumber);
 		} catch (PortMappingException | IndexOutOfBoundException e) {
-			// TODO Auto-generated catch block
-			log.error(e.getMessage());
+			log.error(e.toString());
 		} catch (InvalidPortException e) {
-			// TODO Auto-generated catch block
-			log.error(e.getMessage());
+			log.error(e.toString());
 		} catch (NetworkMappingException e) {
-			// TODO Auto-generated catch block
-			log.error(e.getMessage());
+			log.error(e.toString());
 		}
 		return virtualLink;
 	}
@@ -100,29 +97,38 @@ public class VSDNMigrator {
 	// corresponding mapping and flows
 	public int disconnectHost(int hostId) {
 		try {
-
-			Host h = virtualNetwork.getHost(hostId);
-			OVXSwitch s=null;
-			OVXPort p=null;
-			if (h != null) {
-				p = h.getPort();
-				s = p.getParentSwitch();
-			}
+			// TODO Figure out the experimental version of this, should the
+			// switches be removed on the fly, or not
+			// implemented but not yet sure on, should it be used or not
+			/*
+			 * Host h = virtualNetwork.getHost(hostId); OVXSwitch s=null;
+			 * OVXPort p=null; if (h != null) { p = h.getPort(); s =
+			 * p.getParentSwitch(); }
+			 */
 			// verify the arguments
 			HandlerUtils.isValidHostId(tenantId, hostId);
 			// Disconnect the host
 			virtualNetwork.disconnectHost(hostId);
-			//disconnect the port
-			virtualNetwork.removePort(s.getSwitchId(), p.getPortNumber());
-			
-			//Check if switch needs to be removed
-			Map<Short, OVXPort> m = s.getPorts();
-			for(Short key: m.keySet()){
-				OVXPort lp=m.get(key);
-				log.info("UUUUUUUUUUUUUUUUUUUUUU "+lp.toString());
-			}
-			
-			log.info("**** VSDNMigrator **** : Successfully removed the host");
+			// disconnect the port
+			// virtualNetwork.removeLink(p.getLink().getInLink());
+			// virtualNetwork.removeLink(p.getLink().getOutLink());
+			// virtualNetwork.removePort(s.getSwitchId(), p.getPortNumber());
+
+			// Check if switch needs to be removed
+			/*
+			 * Map<Short, OVXPort> m = s.getPorts(); boolean toBeRemoved=true;
+			 * for(Short key: m.keySet()){ OVXPort lp=m.get(key);
+			 * if(lp.isEdge()){ toBeRemoved=false; }
+			 * //log.info("UUUUUUUUUUUUUUUUUUUUUU "+lp.toString()); } for(Short
+			 * key: m.keySet()){ OVXPort lp=m.get(key); if(!lp.isEdge()){
+			 * virtualNetwork.removeLink(lp.getLink().getInLink());
+			 * virtualNetwork.removeLink(lp.getLink().getOutLink()); }
+			 * virtualNetwork.removePort(s.getSwitchId(), lp.getPortNumber());
+			 * //log.info("UUUUUUUUUUUUUUUUUUUUUU "+lp.toString()); }
+			 * virtualNetwork.removeSwitch(s.getSwitchId()); }
+			 */
+
+			// log.info("**** VSDNMigrator **** : Successfully removed the host");
 		} catch (final InvalidTenantIdException e) {
 			log.error("**** VSDNMigrator (ErrorCode : -1) **** : Invalid Tenant ID in disconnectHost()");
 			return -1;
@@ -147,13 +153,13 @@ public class VSDNMigrator {
 			// Create New port
 			OVXPort ovxPort = virtualNetwork.createPort(pDpid, pPort);
 
-			// Check the vaildity of the new port
+			// Check the validity of the new port
 			if (ovxPort == null) {
 				log.error("**** VSDNMigrator (ErrorCode : -999) **** : Inernal Error in createPort");
 				return null;
 			}
-			log.info("**** VSDNMigrator **** : Successfully created a virtual port at port "
-					+ pPort + " on switch " + pDpid);
+			// log.info("**** VSDNMigrator **** : Successfully created a virtual port at port "
+			// + pPort + " on switch " + pDpid);
 
 			return ovxPort;
 
@@ -198,8 +204,8 @@ public class VSDNMigrator {
 				return null;
 			}
 
-			log.info("**** VSDNMigrator **** : Successfully connected the virtual Host "
-					+ mac + " on switch " + vDpid);
+			// log.info("**** VSDNMigrator **** : Successfully connected the virtual Host "
+			// + mac + " on switch " + vDpid);
 			return host;
 
 		} catch (final InvalidTenantIdException e) {

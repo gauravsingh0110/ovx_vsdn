@@ -554,16 +554,16 @@ def do_getVirtualTopology(gopts, opts, args):
 # Methods added for vsdn_project by Gaurav
 
 def pa_migrateVM(args, cmd):
-    usage = "%s <tenant_id> <hgost_id> <host_mac> <switch_virtual_dpid> <switch_physical_dpid> <old_port> <new_port>" % USAGE.format(cmd)
+    usage = "%s <tenant_id> <host_id> <host_mac> <switch_physical_dpid> <physical_port>" % USAGE.format(cmd)
     (sdesc, ldesc) = DESCS[cmd]
     parser = OptionParser(usage=usage, description=ldesc)
     return parser.parse_args(args)
 
 def do_migrateVM(gopts, opts, args):
-    if len(args) != 6:
-        print "Migrate VM : Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, physical_port"
+    if len(args) != 5:
+        print "Migrate VM : Must specify a tenant_id, host_id, host_mac, switch_physical_dpid, physical_port"
         sys.exit()
-    req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1]), "vsdn_hmac" : args[2], "vsdn_svdpid": args[3], "vsdn_spdpid":args[4], "vsdn_pport" : int(args[5])}
+    req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1]), "vsdn_hmac" : args[2], "vsdn_spdpid":args[3], "vsdn_pport" : int(args[4])}
     reply = connect(gopts, "tenant", "migrateVM", data=req, passwd=getPasswd(gopts))
     #hostId = reply.get('hostId')
     #if hostId:
@@ -598,6 +598,23 @@ def do_getAllowedSwitches(gopts, opts, args):
         sys.exit()
     req = { "tenantId" : int(args[0]), "vsdn_hid" : int(args[1])}
     reply = connect(gopts, "tenant", "getAllowedSwitches", data=req, passwd=getPasswd(gopts))
+    #hostId = reply.get('hostId')
+    #if hostId:
+    print "reply %s"% (reply)
+
+
+def pa_traceRoute(args, cmd):
+    usage = "%s <tenant_id> <src_ip> <dst_ip> <timestamp> <protocol> " % USAGE.format(cmd)
+    (sdesc, ldesc) = DESCS[cmd]
+    parser = OptionParser(usage=usage, description=ldesc)
+    return parser.parse_args(args)
+
+def do_traceRoute(gopts, opts, args):
+    if len(args) != 5:
+        print "traceRoute : Must specify a tenant_id, source_ip, destination_id, timestamp, protocol"
+        sys.exit()
+    req = { "tenantId" : int(args[0]), "vsdn_srcip" : args[1], "vsdn_dstip" : args[2],"vsdn_timestamp" : long(args[3]),"vsdn_protocol" : args[4]}
+    reply = connect(gopts, "tenant", "traceRoute", data=req, passwd=getPasswd(gopts))
     #hostId = reply.get('hostId')
     #if hostId:
     print "reply %s"% (reply)
@@ -725,6 +742,7 @@ CMDS = {
     'migrateVM' : (pa_migrateVM, do_migrateVM),
     'changeRestriction' : (pa_changeRestriction, do_changeRestriction),
     'getAllowedSwitches' : (pa_getAllowedSwitches, do_getAllowedSwitches),
+    'traceRoute' : (pa_traceRoute, do_traceRoute),
 
 
     'help' : (pa_help, do_help)
@@ -840,15 +858,18 @@ DESCS = {
 
 
     'migrateVM' : ("Migrate VM from one Physical Host to another",
-                      ("Migrate VM from one Physical Host to another. Must specify a tenant_id, host_id, host_mac, switch_virtual_dpid, switch_physical_dpid, physical_port."
+                      ("Migrate VM from one Physical Host to another. Must specify a tenant_id, host_id, host_mac, switch_physical_dpid, physical_port."
                         "\nExample: migrateVM 1 //TODO : update this with correct example")),
     'changeRestriction' : ("Change the Topology Restriction of a Virtual Network",
                             ("Change the Topology Restriction of a Virtual Network. Must specify a tenant_id, is_topology_restricted."
                         "\nExample: changeRestriction 1 true")),
     'getAllowedSwitches' : ("Get the list of Physical Switches Valid for Migration",
                             ("Get the list of Physical Switches Valid for Migration. Must specify a tenant_id, host_id."
-                        "\nExample: getAllowedSwitches 1 2"))
+                        "\nExample: getAllowedSwitches 1 2")),
 
+    'traceRoute' : ("Get path between two IPs",
+                      ("Get path between two IPs. Must specify a tenant_id, source_ip, destination_id, timestamp, protocol."
+                        "\nExample: traceRoute 1 10.0.0.1 10.0.0.2 1434721741774 2 "))
 
 }
 

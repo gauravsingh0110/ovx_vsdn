@@ -1,5 +1,6 @@
 package net.onrc.openvirtex.migrator;
 
+//TODO Outdated class needs lots of updates not using anymore
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;

@@ -26,6 +26,7 @@ import net.onrc.openvirtex.core.cmd.CmdLineSettings;
 import net.onrc.openvirtex.core.io.ClientChannelPipeline;
 import net.onrc.openvirtex.core.io.SwitchChannelPipeline;
 import net.onrc.openvirtex.db.DBManager;
+import net.onrc.openvirtex.debugger.DBHandler;
 import net.onrc.openvirtex.elements.datapath.OVXSwitch;
 import net.onrc.openvirtex.elements.link.OVXLinkField;
 import net.onrc.openvirtex.elements.network.OVXNetwork;
@@ -250,6 +251,8 @@ public class OpenVirteXController implements Runnable {
 
         this.log.info("Shutting down database connection");
         DBManager.getInstance().close();
+        //Added By Gaurav for vsdn_project to disconnect the databse 
+        DBHandler.disconnect();
     }
 
     public static OpenVirteXController getInstance() {

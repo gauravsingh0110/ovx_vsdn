@@ -292,6 +292,14 @@
     </repository>
   </repositories>
   <dependencies>
+<dependency>
+<groupId>mysql</groupId>
+<artifactId>mysql-connector-java</artifactId>
+<version>5.1.35</version>
+<type>jar</type>
+<scope>compile</scope>
+</dependency>
+  
     <dependency>
     <groupId>com.thetransactioncompany</groupId>
     <artifactId>jsonrpc2-base</artifactId>
