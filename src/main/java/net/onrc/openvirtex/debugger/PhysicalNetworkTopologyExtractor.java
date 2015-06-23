@@ -4,9 +4,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -190,7 +192,10 @@ public class PhysicalNetworkTopologyExtractor {
 			// Getting network topology
 			if (physicalNetwork.getSwitches().size() != 0) {
 
-				Iterator i = physicalNetwork.getSwitches().iterator();
+				Set<PhysicalSwitch> el = new HashSet<PhysicalSwitch>();
+				el.addAll(physicalNetwork.getSwitches());
+
+				Iterator i = el.iterator();
 				while (i.hasNext()) {
 					PhysicalSwitch s = (PhysicalSwitch) i.next();
 					// log.info("******************* Neighbours ",physicalNetwork.getNeighbors(s));
@@ -201,7 +206,10 @@ public class PhysicalNetworkTopologyExtractor {
 
 			if (physicalNetwork.getLinks().size() != 0) {
 
-				Iterator e = physicalNetwork.getLinks().iterator();
+				Set<PhysicalLink> el = new HashSet<PhysicalLink>();
+				el.addAll(physicalNetwork.getLinks());
+
+				Iterator e = el.iterator();
 				while (e.hasNext()) {
 					// log.info("***************** Links : " +
 					// e.next().toString());

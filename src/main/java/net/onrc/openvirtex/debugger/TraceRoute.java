@@ -141,7 +141,7 @@ public class TraceRoute extends ApiHandler<Map<String, Object>> {
 			// log.info(query);
 			DBHandler.insertValues(query);
 
-			query = "CREATE TABLE FinalFlowMods AS (SELECT * FROM TempFlowMods where (Match_dl_vlan,Match_in_port,Match_dl_src,Match_dl_dst) NOT IN (Select Match_dl_vlan,Match_in_port,Match_dl_src,Match_dl_dst from TempFlowRems));";
+			query = "CREATE TABLE FinalFlowMods AS (SELECT * FROM TempFlowMods where (Match_dl_vlan,Match_in_port,Match_dl_src,Match_dl_dst,pSwitch_ID) NOT IN (Select Match_dl_vlan,Match_in_port,Match_dl_src,Match_dl_dst,pSwitch_ID from TempFlowRems));";
 			DBHandler.insertValues(query);
 			// log.info(query);
 
@@ -174,7 +174,7 @@ public class TraceRoute extends ApiHandler<Map<String, Object>> {
 				DBHandler.insertValues(query);
 				return path;
 			}
-			String new_nw_src, new_nw_dst, new_dl_src, new_dl_dst, out_port;
+			String new_nw_src = null, new_nw_dst = null, new_dl_src = null, new_dl_dst = null, out_port = null;
 			String srcSwitch = srcDpid;
 			String srcSwitchPort = srcPort;
 			boolean isEdge = false;
@@ -183,13 +183,19 @@ public class TraceRoute extends ApiHandler<Map<String, Object>> {
 				rs.next();
 				String action = rs.getString("Actions");
 				String[] sAction = action.split(",");
+				if (sAction.length == 5) {
+					new_nw_dst = sAction[0].split("\\[")[2].split("\\]")[0];
+					new_nw_src = sAction[1].split("\\[")[1].split("\\]")[0];
+					new_dl_src = sAction[2].split("\\[")[1].split("\\]")[0];
+					new_dl_dst = sAction[3].split("\\[")[1].split("\\]")[0];
+					out_port = sAction[4].split("\\[")[1].split("\\]")[0];
+				}
+				if (sAction.length == 3) {
+					new_dl_src = sAction[0].split("\\[")[2].split("\\]")[0];
+					new_dl_dst = sAction[1].split("\\[")[1].split("\\]")[0];
+					out_port = sAction[2].split("\\[")[1].split("\\]")[0];
 
-				new_nw_dst = sAction[0].split("\\[")[2].split("\\]")[0];
-				new_nw_src = sAction[1].split("\\[")[1].split("\\]")[0];
-				new_dl_src = sAction[2].split("\\[")[1].split("\\]")[0];
-				new_dl_dst = sAction[3].split("\\[")[1].split("\\]")[0];
-				out_port = sAction[4].split("\\[")[1].split("\\]")[0];
-
+				}
 				query = "SELECT * FROM FinalLinkEntries WHERE  Src_Switch_ID='"
 						+ srcSwitch + "' AND Src_Switch_Port='" + out_port
 						+ "';";
@@ -221,7 +227,7 @@ public class TraceRoute extends ApiHandler<Map<String, Object>> {
 							+ " AND FirstSeen <=" + timeStamp + ";";
 
 					// log.info(query);
-
+					rs.close();
 					rs = DBHandler.getValues(query);
 					if (!rs.isBeforeFirst()) {
 						message = "Could Not Find Complete Path";
